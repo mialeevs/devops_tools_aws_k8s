@@ -157,5 +157,3 @@ cd devops_tools_aws_k8s/config/stack
 kubectl apply -f jenkins
 
 sleep 60
-
-exec bash
