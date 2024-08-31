@@ -1,0 +1,41 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-dind
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker-dind
+  template:
+    metadata:
+      labels:
+        app: docker-dind
+    spec:
+      containers:
+      - name: dind
+        image: docker:20.10.7-dind
+        securityContext:
+          privileged: true
+        env:
+        - name: DOCKER_TLS_CERTDIR
+          value: "/certs"
+        - name: DOCKER_HOST
+          value: "tcp://localhost:2376"
+        - name: DOCKER_TLS_VERIFY
+          value: "1"
+        - name: DOCKER_CERT_PATH
+          value: "/certs/client"
+        ports:
+        - containerPort: 2376
+        volumeMounts:
+        - name: docker-certs
+          mountPath: /certs/client
+        - name: docker-graph-storage
+          mountPath: /var/lib/docker
+      volumes:
+      - name: docker-certs
+        emptyDir: {}
+      - name: docker-graph-storage
+        emptyDir: {}
