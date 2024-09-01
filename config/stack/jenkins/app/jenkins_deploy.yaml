@@ -27,7 +27,7 @@ spec:
       serviceAccountName: jenkins-admin
       containers:
         - name: jenkins
-          image: manrala/cloudbees:2.473-jdk21
+          image: jenkins/jenkins:lts
           resources:
             limits:
               memory: "2Gi"
