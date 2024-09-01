@@ -156,6 +156,11 @@ cd devops_tools_aws_k8s/config/stack/jenkins
 
 kubectl apply -f jenkins_namespace.yaml
 
+sleep 10
+
+sudo chown -R ubuntu:ubuntu /mnt
+
 kubectl apply -f app 
 
-sleep 60
+sleep 120
+
