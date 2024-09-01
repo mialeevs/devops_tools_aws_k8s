@@ -158,9 +158,16 @@ kubectl apply -f jenkins_namespace.yaml
 
 sleep 10
 
-sudo chown -R ubuntu:ubuntu /mnt
-
 kubectl apply -f app 
 
-sleep 120
+sudo chown -R ubuntu:ubuntu /mnt
 
+cd app
+
+kubectl delete -f jenkins_deploy.yaml
+
+sleep 10
+
+kubectl apply -f jenkins_deploy.yaml
+
+sleep 120
