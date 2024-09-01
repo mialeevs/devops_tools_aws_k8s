@@ -20,7 +20,7 @@ spec:
       - name: volume-permissions
         image: busybox
         command: ["/bin/sh", "-c"]
-        args: ["chown -R 1000:1000 /jenkins-data"]
+        args: ["sudo chown -R 1000:1000 /jenkins-data"]
         volumeMounts:
         - name: jenkins-data
           mountPath: /jenkins-data
