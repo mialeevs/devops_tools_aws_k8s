@@ -23,8 +23,6 @@ spec:
         volumeMounts:
         - name: jenkins-data
           mountPath: /jenkins-data
-        - name: jenkins-docker-certs
-          mountPath: /jenkins-docker-certs
       containers:
       - name: jenkins
         image: manrala/cloudbees:2.475-jdk21-v1

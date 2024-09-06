@@ -152,11 +152,9 @@ rm argocd-linux-amd64
 
 git clone -b  lab https://github.com/mialeevs/devops_tools_aws_k8s.git
 
-cd devops_tools_aws_k8s/config/stack/jenkins_old
+cd devops_tools_aws_k8s/config/stack
 
-kubectl apply -f ns.yaml
-
-kubectl apply -f app
+kubectl apply -f jenkins_old
 
 sleep 10
 
