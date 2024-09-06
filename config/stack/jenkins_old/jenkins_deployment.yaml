@@ -27,7 +27,7 @@ spec:
           mountPath: /jenkins-docker-certs
       containers:
       - name: jenkins
-        image: manrala/cloudbees:2.473-jdk21
+        image: manrala/cloudbees:2.475-jdk21-v1
         ports:
         - containerPort: 8080
         - containerPort: 50000
