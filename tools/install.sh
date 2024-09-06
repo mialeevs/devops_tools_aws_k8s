@@ -150,11 +150,13 @@ rm argocd-linux-amd64
 # Get the password from the secret file
 # kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
-git clone -b  hbttps://github.com/mialeevs/devops_tools_aws_k8s.git
+git clone -b  lab https://github.com/mialeevs/devops_tools_aws_k8s.git
 
-cd devops_tools_aws_k8s/config/stack
+cd devops_tools_aws_k8s/config/stack/jenkins_old
 
-kubectl apply -f jenkins_old
+kubectl apply -f ns.yaml
+
+kubectl apply -f app
 
 sleep 10
 
