@@ -158,3 +158,6 @@ kubectl apply -f jenkins
 
 sleep 10
 
+kubectl apply -f sonarqube
+
+sleep 60
