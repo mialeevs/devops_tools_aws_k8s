@@ -13,16 +13,6 @@ spec:
       labels:
         app: jenkins
     spec:
-      securityContext:
-        fsGroup: 1000
-      initContainers:
-      - name: volume-permissions
-        image: busybox
-        command: ["/bin/sh", "-c"]
-        args: ["chown -R 1000:1000 /jenkins-data"]
-        volumeMounts:
-        - name: jenkins-data
-          mountPath: /jenkins-data
       containers:
       - name: jenkins
         image: manrala/cloudbees:2.475-jdk21-v1
