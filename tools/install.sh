@@ -122,10 +122,6 @@ sleep 5
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.12.2/manifests/install.yaml
 
-sleep 5
-# ArgoCD cli resources
-https://github.com/argoproj/argo-cd/releases/latest
-
 # Installing HELM
 sleep 30
 echo "Installing Helm"
@@ -147,6 +143,8 @@ source ~/.profile
 wget https://github.com/argoproj/argo-cd/releases/download/v2.12.2/argocd-linux-amd64
 sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
 rm argocd-linux-amd64
+sleep 20
+kubectl patch svc argocd-server -n argocd -p '{"spec":{"type":"NodePort"}}'
 # Get the password from the secret file
 # kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
