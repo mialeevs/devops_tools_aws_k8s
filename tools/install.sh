@@ -170,8 +170,8 @@ kubectl apply -f storage.yaml
 sleep 10
 kubectl apply -f jenkins
 sleep 10
-kubectl apply -f sonarqube
-sleep 10
-kubectl apply -f nexus
-sleep 20
+# kubectl apply -f sonarqube
+# sleep 10
+# kubectl apply -f nexus
+# sleep 20
 echo "Installation Completed"
