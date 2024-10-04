@@ -145,11 +145,22 @@ sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
 rm argocd-linux-amd64
 sleep 20
 kubectl patch svc argocd-server -n argocd -p '{"spec":{"type":"NodePort"}}'
+
+# Create a node label and namespaces
 kubectl create ns jenkins
 kubectl create ns sonar
 kubectl create ns nexus
+# Create the folders
+mkdir -p /home/ubuntu/data/jenkins
+mkdir -p /home/ubuntu/data/postgres_data
+mkdir -p /home/ubuntu/data/sonarqube_data
+mkdir -p /home/ubuntu/data/sonarqube_logs
+mkdir -p /home/ubuntu/data/sonarqube_extensions
+
+
 # Get the password from the secret file
 # kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+
 
 git clone -b  new https://github.com/mialeevs/devops_tools_aws_k8s.git
 
@@ -158,4 +169,3 @@ cd devops_tools_aws_k8s/config/stack
 kubectl apply -f storage.yaml
 
 sleep 60
-
