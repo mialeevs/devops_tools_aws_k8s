@@ -28,22 +28,18 @@ sudo systemctl daemon-reload
 sudo systemctl enable crio
 sudo systemctl start crio
 
-
-echo "Updating the repositories"
-# Update the repositiries
-sudo apt-get update -y
-sudo apt-get install cron -y
-
 echo "Exporting kubernetes repositories and keyrings values"
 
 sudo echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
-echo "Installing kubernetes tools"
+echo "Updating the repositories"
+# Update the repositiries
+sudo apt-get update -y
 
-# Use the same versions to avoid issues with the installation.
-sudo apt-get install -y kubelet kubeadm kubectl
+echo "Installing kubernetes tools"
+sudo apt-get install -y cron kubelet kubeadm kubectl
 
 
 sleep 5
