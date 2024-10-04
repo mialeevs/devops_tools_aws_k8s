@@ -14,5 +14,5 @@ spec:
     - protocol: TCP
       port: 9000
       targetPort: 9000
-      nodePort: 30902
+      nodePort: 30901
   type: NodePort

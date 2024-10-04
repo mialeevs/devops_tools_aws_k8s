@@ -15,5 +15,5 @@ spec:
     - protocol: TCP
       port: 8081
       targetPort: 8081
-      nodePort: 30901
+      nodePort: 30902
   type: NodePort
