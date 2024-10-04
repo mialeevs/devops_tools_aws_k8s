@@ -10,6 +10,7 @@ echo "Exporting OS and CRIO Version"
 
 export OS_VERSION=xUbuntu_22.04
 export CRIO_VERSION=v1.30
+export KUBERNETES=v1.30
 
 sudo apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
@@ -30,9 +31,9 @@ sudo systemctl start crio
 
 echo "Exporting kubernetes repositories and keyrings values"
 
-sudo echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$KUBERNETES/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
-sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/$KUBERNETES/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 echo "Updating the repositories"
 # Update the repositiries
