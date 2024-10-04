@@ -4,6 +4,7 @@
 sudo apt-get update -y
 sudo apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
+
 # Export the OS and CRI_O version values
 echo "Exporting OS and CRIO Version"
 
@@ -20,27 +21,30 @@ echo "Installing cri-o"
 sudo apt-get update -y
 sudo apt-get install cri-o -y
 
-
-echo "Updating the repositories"
-# Update the repositiries
-sudo apt-get update -y
-sudo apt-get install cron -y
-
-sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-
-sudo echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-
-echo "Installing kubernetes tools"
-
-# Use the same versions to avoid issues with the installation.
-sudo apt-get install -y kubelet kubeadm kubectl
-
 sleep 5
 
 echo "Start the cri-o service"
 sudo systemctl daemon-reload
 sudo systemctl enable crio
 sudo systemctl start crio
+
+
+echo "Updating the repositories"
+# Update the repositiries
+sudo apt-get update -y
+sudo apt-get install cron -y
+
+echo "Exporting kubernetes repositories and keyrings values"
+
+sudo echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+echo "Installing kubernetes tools"
+
+# Use the same versions to avoid issues with the installation.
+sudo apt-get install -y kubelet kubeadm kubectl
+
 
 sleep 5
 
