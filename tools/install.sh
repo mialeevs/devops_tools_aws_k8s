@@ -152,11 +152,11 @@ rm argocd-linux-amd64
 
 sudo su -c "chown -R ubuntu:ubuntu /mnt" ubuntu
 
-git clone -b  lab https://github.com/mialeevs/devops_tools_aws_k8s.git
+git clone -b  new https://github.com/mialeevs/devops_tools_aws_k8s.git
 
 cd devops_tools_aws_k8s/config/stack
 
-kubectl apply -f jenkins
+# kubectl apply -f jenkins
 
 sleep 60
 
