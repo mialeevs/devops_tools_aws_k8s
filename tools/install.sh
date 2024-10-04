@@ -155,7 +155,7 @@ git clone -b  new https://github.com/mialeevs/devops_tools_aws_k8s.git
 
 cd devops_tools_aws_k8s/config/stack
 
-kubectl apply -f jenkins
+kubectl apply -f storage.yaml
 
 sleep 60
 
