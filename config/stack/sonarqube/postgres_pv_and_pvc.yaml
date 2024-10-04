@@ -17,7 +17,7 @@ spec:
     name: postgres-data-pvc
     namespace: sonar
   capacity:
-    storage: 10Gi
+    storage: 8Gi
   accessModes:
     - ReadWriteOnce
   local:
@@ -43,4 +43,4 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 8Gi

@@ -30,7 +30,6 @@ spec:
           operator: In
           values:
           - worker-node01
-
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
