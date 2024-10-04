@@ -1,22 +1,44 @@
-
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: nexus-data-pv
+  labels:
+    type: local
 spec:
+  storageClassName: local-storage
+  claimRef:
+    name: nexus-data-pvc
+    namespace: nexus
   capacity:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  hostPath:
-    path: /mnt/data/nexus-data
+  local:
+    path: /home/ubuntu/data/nexus-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: color
+          operator: In
+          values:
+          - orange
 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: nexus-data-pvc
+  namespace: nexus
 spec:
+  storageClassName: local-storage
   accessModes:
     - ReadWriteOnce
   resources:

@@ -4,38 +4,23 @@
 sudo apt-get update -y
 sudo apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
+
 # Export the OS and CRI_O version values
 echo "Exporting OS and CRIO Version"
 
 export OS_VERSION=xUbuntu_22.04
-export CRIO_VERSION=1.28
+export CRIO_VERSION=v1.30
+export KUBERNETES=v1.30
 
-sudo curl -fsSL https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS_VERSION/Release.key | sudo gpg --dearmor -o /usr/share/keyrings/libcontainers-archive-keyring.gpg
+sudo apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
-sudo curl -fsSL https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$CRIO_VERSION/$OS_VERSION/Release.key | sudo gpg --dearmor -o /usr/share/keyrings/libcontainers-crio-archive-keyring.gpg
+sudo curl -fsSL https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/cri-o-apt-keyring.gpg
 
-# we can get the latest release details from https://cri-o.io/
+sudo echo "deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/cri-o.list
 
-sudo echo "deb [signed-by=/usr/share/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS_VERSION/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-
-sudo echo "deb [signed-by=/usr/share/keyrings/libcontainers-crio-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$CRIO_VERSION/$OS_VERSION/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:$CRIO_VERSION.list
-
-echo "Exporting kubernetes repositories and keyrings values"
-
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-
-echo "Updating the repositories"
-# Update the repositiries
+echo "Installing cri-o"
 sudo apt-get update -y
-sudo apt-get install cron -y
-
-
-echo "Installing cri-o and kubernetes tools"
-
-# Use the same versions to avoid issues with the installation.
-sudo apt-get install -y cri-o cri-o-runc cri-tools kubelet kubeadm kubectl
+sudo apt-get install cri-o -y
 
 sleep 5
 
@@ -43,6 +28,20 @@ echo "Start the cri-o service"
 sudo systemctl daemon-reload
 sudo systemctl enable crio
 sudo systemctl start crio
+
+echo "Exporting kubernetes repositories and keyrings values"
+
+sudo echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$KUBERNETES/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/$KUBERNETES/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+echo "Updating the repositories"
+# Update the repositiries
+sudo apt-get update -y
+
+echo "Installing kubernetes tools"
+sudo apt-get install -y cron kubelet kubeadm kubectl
+
 
 sleep 5
 
@@ -99,12 +98,13 @@ echo "untaint controlplane node"
 kubectl taint nodes $(kubectl get nodes -o=jsonpath='{.items[].metadata.name}') node.kubernetes.io/not-ready:NoSchedule-
 kubectl taint nodes $(kubectl get nodes -o=jsonpath='{.items[].metadata.name}') node-role.kubernetes.io/control-plane=:NoSchedule-
 kubectl get node -o wide
+kubectl label node $(kubectl get nodes --selector='node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].metadata.name}') color=orange
 
 sleep 5
 
 # Use this if you have initialised the cluster with Calico network add on.
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/tigera-operator.yaml
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/custom-resources.yaml -O
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/tigera-operator.yaml
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/custom-resources.yaml -O
 kubectl create -f custom-resources.yaml
 
 
@@ -121,10 +121,6 @@ sleep 5
 # Non HA installation
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.12.2/manifests/install.yaml
-
-sleep 5
-# ArgoCD cli resources
-https://github.com/argoproj/argo-cd/releases/latest
 
 # Installing HELM
 sleep 30
@@ -147,27 +143,35 @@ source ~/.profile
 wget https://github.com/argoproj/argo-cd/releases/download/v2.12.2/argocd-linux-amd64
 sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
 rm argocd-linux-amd64
+sleep 20
+kubectl patch svc argocd-server -n argocd -p '{"spec":{"type":"NodePort"}}'
+kubectl patch svc argocd-server -n argocd --type='json' -p='[{"op": "replace", "path": "/spec/ports/0/nodePort", "value": 30904}]'
+kubectl patch svc argocd-server -n argocd --type='json' -p='[{"op": "replace", "path": "/spec/ports/1/nodePort", "value": 30905}]'
+
+# Create a node label and namespaces
+kubectl create ns jenkins
+kubectl create ns sonar
+kubectl create ns nexus
+# Create the folders
+mkdir -p /home/ubuntu/data/jenkins
+mkdir -p /home/ubuntu/data/postgres_data
+mkdir -p /home/ubuntu/data/sonarqube_data
+mkdir -p /home/ubuntu/data/sonarqube_logs
+mkdir -p /home/ubuntu/data/sonarqube_extensions
+mkdir -p /home/ubuntu/data/nexus-data
+
+
 # Get the password from the secret file
 # kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
-git clone https://github.com/mialeevs/devops_tools_aws_k8s.git
-
-cd devops_tools_aws_k8s/config/stack/jenkins
-
-kubectl apply -f jenkins_namespace.yaml
-
+git clone -b  new https://github.com/mialeevs/devops_tools_aws_k8s.git
+cd devops_tools_aws_k8s/config/stack
+kubectl apply -f storage.yaml
 sleep 10
-
-kubectl apply -f app 
-
-sudo chown -R ubuntu:ubuntu /mnt
-
-cd app
-
-kubectl delete -f jenkins_deploy.yaml
-
+kubectl apply -f jenkins
 sleep 10
-
-kubectl apply -f jenkins_deploy.yaml
-
-sleep 120
+kubectl apply -f sonarqube
+sleep 10
+kubectl apply -f nexus
+sleep 20
+echo "Installation Completed"

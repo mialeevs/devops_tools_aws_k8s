@@ -1,24 +1,40 @@
-
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: postgres-data-pv
+  labels:
+    type: local
 spec:
+  storageClassName: local-storage
+  claimRef:
+    name: postgres-data-pvc
+    namespace: sonar
   capacity:
-    storage: 10Gi
+    storage: 8Gi
   accessModes:
     - ReadWriteOnce
-  hostPath:
-    path: /mnt/data/postgres_data
+  local:
+    path: /home/ubuntu/data/postgres_data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: color
+          operator: In
+          values:
+          - orange
 
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-data-pvc
+  namespace: sonar
 spec:
+  storageClassName: local-storage
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 8Gi

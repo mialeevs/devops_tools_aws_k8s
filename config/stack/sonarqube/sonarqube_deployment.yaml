@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sonarqube
+  namespace: sonar
 spec:
   replicas: 1
   selector:
@@ -14,7 +15,7 @@ spec:
     spec:
       containers:
       - name: sonarqube
-        image: sonarqube:8.9.2-community
+        image: sonarqube:10.6-community
         ports:
         - containerPort: 9000
         env:
