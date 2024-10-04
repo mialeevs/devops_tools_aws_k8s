@@ -146,6 +146,8 @@ rm argocd-linux-amd64
 sleep 20
 kubectl patch svc argocd-server -n argocd -p '{"spec":{"type":"NodePort"}}'
 kubectl create ns jenkins
+kubectl create ns sonar
+kubectl create ns nexus
 # Get the password from the secret file
 # kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
