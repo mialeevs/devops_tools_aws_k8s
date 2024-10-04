@@ -153,12 +153,12 @@ kubectl create ns jenkins
 kubectl create ns sonar
 kubectl create ns nexus
 # Create the folders
-mkdir -p /home/ubuntu/data/jenkins
-mkdir -p /home/ubuntu/data/postgres_data
-mkdir -p /home/ubuntu/data/sonarqube_data
-mkdir -p /home/ubuntu/data/sonarqube_logs
-mkdir -p /home/ubuntu/data/sonarqube_extensions
-mkdir -p /home/ubuntu/data/nexus-data
+mkdir -p /home/$USER/data/jenkins
+mkdir -p /home/$USER/data/postgres_data
+mkdir -p /home/$USER/data/sonarqube_data
+mkdir -p /home/$USER/data/sonarqube_logs
+mkdir -p /home/$USER/data/sonarqube_extensions
+mkdir -p /home/$USER/data/nexus-data
 
 
 # Get the password from the secret file
