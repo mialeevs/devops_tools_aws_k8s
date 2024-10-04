@@ -8,7 +8,7 @@ sudo apt-get install -y apt-transport-https ca-certificates curl gnupg2 software
 echo "Exporting OS and CRIO Version"
 
 export OS_VERSION=xUbuntu_22.04
-export CRIO_VERSION=1.28
+export CRIO_VERSION=1.30
 
 sudo curl -fsSL https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS_VERSION/Release.key | sudo gpg --dearmor -o /usr/share/keyrings/libcontainers-archive-keyring.gpg
 
@@ -35,7 +35,7 @@ sudo apt-get install cron -y
 echo "Installing cri-o and kubernetes tools"
 
 # Use the same versions to avoid issues with the installation.
-sudo apt-get install -y cri-o cri-o-runc cri-tools kubelet kubeadm kubectl
+sudo apt-get install -y cri-o cri-tools kubelet kubeadm kubectl
 
 sleep 5
 
@@ -99,12 +99,13 @@ echo "untaint controlplane node"
 kubectl taint nodes $(kubectl get nodes -o=jsonpath='{.items[].metadata.name}') node.kubernetes.io/not-ready:NoSchedule-
 kubectl taint nodes $(kubectl get nodes -o=jsonpath='{.items[].metadata.name}') node-role.kubernetes.io/control-plane=:NoSchedule-
 kubectl get node -o wide
+kubectl label node $(kubectl get nodes --selector='node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].metadata.name}') color=orange
 
 sleep 5
 
 # Use this if you have initialised the cluster with Calico network add on.
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/tigera-operator.yaml
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/custom-resources.yaml -O
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/tigera-operator.yaml
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/custom-resources.yaml -O
 kubectl create -f custom-resources.yaml
 
 
@@ -156,16 +157,15 @@ mkdir -p /home/ubuntu/data/postgres_data
 mkdir -p /home/ubuntu/data/sonarqube_data
 mkdir -p /home/ubuntu/data/sonarqube_logs
 mkdir -p /home/ubuntu/data/sonarqube_extensions
+mkdir -p /home/ubuntu/data/nexus-data
 
 
 # Get the password from the secret file
 # kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
-
 git clone -b  new https://github.com/mialeevs/devops_tools_aws_k8s.git
-
 cd devops_tools_aws_k8s/config/stack
-
 kubectl apply -f storage.yaml
-
+sleep 10
+kubectl apply -f jenkins
 sleep 60

@@ -20,10 +20,10 @@ spec:
     required:
       nodeSelectorTerms:
       - matchExpressions:
-        - key: kubernetes.io/hostname
+        - key: color
           operator: In
           values:
-          - worker-node01
+          - orange
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -60,10 +60,10 @@ spec:
     required:
       nodeSelectorTerms:
       - matchExpressions:
-        - key: kubernetes.io/hostname
+        - key: color
           operator: In
           values:
-          - worker-node01
+          - orange
 
 ---
 apiVersion: v1
@@ -101,10 +101,10 @@ spec:
     required:
       nodeSelectorTerms:
       - matchExpressions:
-        - key: kubernetes.io/hostname
+        - key: color
           operator: In
           values:
-          - worker-node01
+          - orange
 
 ---
 apiVersion: v1

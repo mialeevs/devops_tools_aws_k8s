@@ -15,15 +15,15 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /home/data/data/postgres-data
+    path: /home/ubuntu/data/postgres_data
   nodeAffinity:
     required:
       nodeSelectorTerms:
       - matchExpressions:
-        - key: kubernetes.io/hostname
+        - key: color
           operator: In
           values:
-          - worker-node01
+          - orange
 
 ---
 apiVersion: v1

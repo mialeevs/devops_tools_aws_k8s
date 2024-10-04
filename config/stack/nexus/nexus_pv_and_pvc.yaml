@@ -21,15 +21,15 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /mnt
+    path: /home/ubuntu/data/nexus-data
   nodeAffinity:
     required:
       nodeSelectorTerms:
       - matchExpressions:
-        - key: kubernetes.io/hostname
+        - key: color
           operator: In
           values:
-          - worker-node01
+          - orange
 
 ---
 apiVersion: v1
