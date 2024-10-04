@@ -9,7 +9,6 @@ echo "Exporting OS and CRIO Version"
 
 export OS_VERSION=xUbuntu_22.04
 export CRIO_VERSION=v1.30
-export KUBERNETES_VERSION=v1.30
 
 sudo apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
@@ -17,7 +16,7 @@ sudo curl -fsSL https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/deb/Rel
 
 sudo echo "deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/cri-o.list
 
-
+echo "Installing cri-o"
 sudo apt-get update -y
 sudo apt-get install cri-o -y
 
@@ -27,11 +26,11 @@ echo "Updating the repositories"
 sudo apt-get update -y
 sudo apt-get install cron -y
 
-sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
-sudo echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$KUBERNETES_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
-echo "Installing cri-o and kubernetes tools"
+echo "Installing kubernetes tools"
 
 # Use the same versions to avoid issues with the installation.
 sudo apt-get install -y kubelet kubeadm kubectl
