@@ -145,6 +145,7 @@ sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
 rm argocd-linux-amd64
 sleep 20
 kubectl patch svc argocd-server -n argocd -p '{"spec":{"type":"NodePort"}}'
+kubectl patch svc argocd-server -n argocd --type='json' -p='[{"op": "replace", "path": "/spec/ports/0/nodePort", "value": 30905}]'
 
 # Create a node label and namespaces
 kubectl create ns jenkins
@@ -167,4 +168,9 @@ cd devops_tools_aws_k8s/config/stack
 kubectl apply -f storage.yaml
 sleep 10
 kubectl apply -f jenkins
-sleep 60
+sleep 10
+kubectl apply -f sonarqube
+sleep 10
+kubectl apply -f nexus
+sleep 20
+echo "Installation Completed"
