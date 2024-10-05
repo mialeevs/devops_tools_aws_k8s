@@ -15,12 +15,12 @@ aws sts get-caller-identity
 ### Clone the repo
 ```bash
 git clone https://github.com/mialeevs/devops_tools_aws_k8s.git
+
+cd devops_tools_aws_k8s
 ```
 
 ### Initilize the cluster
 ```bash
-cd devops_tools_aws_k8s
-
 ./create.sh
 ```
 
