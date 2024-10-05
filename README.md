@@ -19,7 +19,7 @@ git clone https://github.com/mialeevs/devops_tools_aws_k8s.git
 cd devops_tools_aws_k8s
 ```
 
-### Initilize the cluster
+### Initialize the cluster
 ```bash
 ./create.sh
 ```
