@@ -15,7 +15,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /home/ubuntu/data/sonarqube_data
+    path: /mnt/data/sonarqube_data
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -55,7 +55,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /home/ubuntu/data/sonarqube_logs
+    path: /mnt/data/sonarqube_logs
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -96,7 +96,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /home/ubuntu/data/sonarqube_extensions
+    path: /mnt/data/sonarqube_extensions
   nodeAffinity:
     required:
       nodeSelectorTerms:

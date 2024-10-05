@@ -153,18 +153,18 @@ kubectl create ns jenkins
 kubectl create ns sonar
 kubectl create ns nexus
 # Create the folders
-mkdir -p /home/ubuntu/data/jenkins
-mkdir -p /home/ubuntu/data/postgres_data
-mkdir -p /home/ubuntu/data/sonarqube_data
-mkdir -p /home/ubuntu/data/sonarqube_logs
-mkdir -p /home/ubuntu/data/sonarqube_extensions
-mkdir -p /home/ubuntu/data/nexus-data
+sudo mkdir -p /mnt/data/jenkins
+sudo mkdir -p /mnt/data/postgres_data
+sudo mkdir -p /mnt/data/sonarqube_data
+sudo mkdir -p /mnt/data/sonarqube_logs
+sudo mkdir -p /mnt/data/sonarqube_extensions
+sudo mkdir -p /mnt/data/nexus_data
 
 
 # Get the password from the secret file
 # kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
-git clone https://github.com/mialeevs/devops_tools_aws_k8s.git
+git clone -b dev https://github.com/mialeevs/devops_tools_aws_k8s.git
 cd devops_tools_aws_k8s/config/stack
 kubectl apply -f storage.yaml
 sleep 10
