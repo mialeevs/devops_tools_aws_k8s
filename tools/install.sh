@@ -120,7 +120,7 @@ sleep 5
 
 # Non HA installation
 kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.12.2/manifests/install.yaml
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.13.2/manifests/install.yaml
 
 # Installing HELM
 sleep 30
@@ -140,7 +140,7 @@ echo "alias c=clear" >> ~/.bashrc
 source ~/.profile
 
 # Install ArgoCD cli
-wget https://github.com/argoproj/argo-cd/releases/download/v2.12.2/argocd-linux-amd64
+wget https://github.com/argoproj/argo-cd/releases/download/v2.13.2/argocd-linux-amd64
 sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
 rm argocd-linux-amd64
 sleep 20
