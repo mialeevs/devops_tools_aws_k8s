@@ -179,19 +179,22 @@ kubectl create ns jenkins
 kubectl create ns sonar
 kubectl create ns nexus
 # Create the host path folders expected by PersistentVolumes in the manifests
-sudo mkdir -p /home/ubuntu/data/jenkins
-sudo mkdir -p /home/ubuntu/data/postgres_data
-sudo mkdir -p /home/ubuntu/data/sonarqube_data
-sudo mkdir -p /home/ubuntu/data/sonarqube_logs
-sudo mkdir -p /home/ubuntu/data/sonarqube_extensions
-sudo mkdir -p /home/ubuntu/data/nexus-data
+LOCAL_PV_ROOT="/home/ubuntu/data"
+
+sudo mkdir -p "$LOCAL_PV_ROOT/jenkins"
+sudo mkdir -p "$LOCAL_PV_ROOT/postgres_data"
+sudo mkdir -p "$LOCAL_PV_ROOT/sonarqube_data"
+sudo mkdir -p "$LOCAL_PV_ROOT/sonarqube_logs"
+sudo mkdir -p "$LOCAL_PV_ROOT/sonarqube_extensions"
+sudo mkdir -p "$LOCAL_PV_ROOT/nexus-data"
+
 # Jenkins and SonarQube run as UID 1000; Nexus 3 runs as UID 200
-sudo chown -R 1000:1000 /home/ubuntu/data/jenkins
-sudo chown -R 1000:1000 /home/ubuntu/data/postgres_data
-sudo chown -R 1000:1000 /home/ubuntu/data/sonarqube_data
-sudo chown -R 1000:1000 /home/ubuntu/data/sonarqube_logs
-sudo chown -R 1000:1000 /home/ubuntu/data/sonarqube_extensions
-sudo chown -R 200:200 /home/ubuntu/data/nexus-data
+sudo chown -R 1000:1000 "$LOCAL_PV_ROOT/jenkins"
+sudo chown -R 1000:1000 "$LOCAL_PV_ROOT/postgres_data"
+sudo chown -R 1000:1000 "$LOCAL_PV_ROOT/sonarqube_data"
+sudo chown -R 1000:1000 "$LOCAL_PV_ROOT/sonarqube_logs"
+sudo chown -R 1000:1000 "$LOCAL_PV_ROOT/sonarqube_extensions"
+sudo chown -R 200:200 "$LOCAL_PV_ROOT/nexus-data"
 
 
 # Get the password from the secret file

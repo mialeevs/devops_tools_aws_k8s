@@ -15,7 +15,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /mnt/data/postgres_data
+    path: /home/ubuntu/data/postgres_data
   nodeAffinity:
     required:
       nodeSelectorTerms:
