@@ -19,7 +19,7 @@ variable "ec2_instance_type" {
 
 variable "ec2_ami_id" {
   type        = string
-  default     = "ami-0c7217cdde317cfec"
+  default     = "ami-091138d0f0d41ff90"
   description = "The default one for Virginia region"
 }
 

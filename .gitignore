@@ -38,3 +38,21 @@ terraform.rc
 
 # Ignore the pem files
 *.pem
+
+# Local editor, OS, and temporary files
+.vscode/
+.idea/
+*.swp
+*~
+*.bak
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# Ignore Terraform plan and archive outputs
+*.tfplan
+*.plan
+*.zip
+*.tar.gz
+*.tgz

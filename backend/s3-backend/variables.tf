@@ -6,12 +6,6 @@ variable "aws_region" {
 
 variable "backend_s3_bucket_name" {
   type        = string
-  default     = "<name>-terraform-modules-tf-state"
+  default     = "<prefix_name>-terraform-modules-tf-state"
   description = "Bucket name to store the s3 backend"
-}
-
-variable "backend_dynamodb_table_name" {
-  type        = string
-  default     = "<name>-terraform-modules-tf-state-table"
-  description = "Dynamodb name to store the s3 backend"
 }

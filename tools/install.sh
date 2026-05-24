@@ -4,19 +4,23 @@
 sudo apt-get update -y
 sudo apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
+TEMP_DIR="/tmp"
 
 # Export the OS and CRI_O version values
 echo "Exporting OS and CRIO Version"
 
-export OS_VERSION=xUbuntu_22.04
-export CRIO_VERSION=v1.30
-export KUBERNETES=v1.30
+# Updated: Ubuntu 24.04 (Noble), Kubernetes v1.35 (latest stable, May 2026)
+export OS_VERSION=xUbuntu_24.04
+export CRIO_VERSION=v1.35
+export KUBERNETES=v1.35
+export CALICO_VERSION=v3.28.2
 
 sudo apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
-sudo curl -fsSL https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/cri-o-apt-keyring.gpg
+# CRI-O moved from pkgs.k8s.io/addons:/cri-o to download.opensuse.org/repositories/isv:/cri-o
+sudo curl -fsSL https://download.opensuse.org/repositories/isv:/cri-o:/stable:/$CRIO_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/cri-o-apt-keyring.gpg
 
-sudo echo "deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://pkgs.k8s.io/addons:/cri-o:/stable:/$CRIO_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/cri-o.list
+echo "deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://download.opensuse.org/repositories/isv:/cri-o:/stable:/$CRIO_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/cri-o.list
 
 echo "Installing cri-o"
 sudo apt-get update -y
@@ -31,16 +35,16 @@ sudo systemctl start crio
 
 echo "Exporting kubernetes repositories and keyrings values"
 
-sudo echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$KUBERNETES/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$KUBERNETES/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/$KUBERNETES/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 echo "Updating the repositories"
-# Update the repositiries
+# Update the repositories
 sudo apt-get update -y
 
 echo "Installing kubernetes tools"
-sudo apt-get install -y cron kubelet kubeadm kubectl
+sudo apt-get install -y kubelet kubeadm kubectl
 
 
 sleep 5
@@ -79,34 +83,53 @@ sudo swapoff -a
 
 sleep 5
 
-#sudo kubeadm init --pod-network-cidr=192.168.0.0/16
 echo "initialising the cluster"
 
-sudo kubeadm init --pod-network-cidr=192.168.0.0/16 --cri-socket unix:///var/run/crio/crio.sock
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --cri-socket unix:///var/run/crio/crio.sock
 
 sleep 5
 echo "Copying the config file"
 
-sudo mkdir -p $HOME/.kube
+mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 
 sleep 5
 
+# Calico v3.28.2 — install CNI BEFORE untainting so CoreDNS can schedule successfully
+echo "Downloading Calico manifest..."
+MAX_RETRIES=5
+RETRY_COUNT=0
+SUCCESS=false
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+  if curl -fsSL https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/calico.yaml -O; then
+    SUCCESS=true
+    break
+  else
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+      echo "Failed to download Calico manifest (attempt $RETRY_COUNT/$MAX_RETRIES). Retrying in $((RETRY_COUNT * 5)) seconds..."
+      sleep $((RETRY_COUNT * 5))
+    fi
+  fi
+done
+
+if [ "$SUCCESS" = false ]; then
+  echo "ERROR: Failed to download Calico manifest after $MAX_RETRIES attempts"
+  exit 1
+fi
+
+kubectl apply -f calico.yaml
+
+sleep 30
+
 echo "untaint controlplane node"
-kubectl taint nodes $(kubectl get nodes -o=jsonpath='{.items[].metadata.name}') node.kubernetes.io/not-ready:NoSchedule-
-kubectl taint nodes $(kubectl get nodes -o=jsonpath='{.items[].metadata.name}') node-role.kubernetes.io/control-plane=:NoSchedule-
+kubectl taint nodes $(kubectl get nodes -o=jsonpath='{.items[].metadata.name}') node.kubernetes.io/not-ready:NoSchedule- 2>/dev/null || true
+kubectl taint nodes $(kubectl get nodes -o=jsonpath='{.items[].metadata.name}') node-role.kubernetes.io/control-plane=:NoSchedule- 2>/dev/null || true
 kubectl get node -o wide
 kubectl label node $(kubectl get nodes --selector='node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].metadata.name}') color=orange
-
-sleep 5
-
-# Use this if you have initialised the cluster with Calico network add on.
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/tigera-operator.yaml
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/custom-resources.yaml -O
-kubectl create -f custom-resources.yaml
-
 
 sleep 5
 
@@ -119,14 +142,17 @@ rm -rf kubernetes_installation_crio
 sleep 5
 
 # Non HA installation
+# ArgoCD v3.4.2 (latest stable, May 2026)
+# Use --server-side to avoid the 262144-byte annotation limit on large CRDs
+# (e.g. applicationsets.argoproj.io) that breaks a standard client-side apply.
 kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.13.2/manifests/install.yaml
+kubectl apply -n argocd --server-side -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.2/manifests/install.yaml
 
-# Installing HELM
+# Installing HELM (v4 - latest stable, released Nov 2025)
 sleep 30
 echo "Installing Helm"
 sudo apt-get update -y
-curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4
 chmod 700 get_helm.sh
 ./get_helm.sh
 rm get_helm.sh
@@ -139,8 +165,8 @@ echo "alias k=kubectl" >> ~/.bashrc
 echo "alias c=clear" >> ~/.bashrc
 source ~/.profile
 
-# Install ArgoCD cli
-wget https://github.com/argoproj/argo-cd/releases/download/v2.13.2/argocd-linux-amd64
+# Install ArgoCD CLI v3.4.2
+wget https://github.com/argoproj/argo-cd/releases/download/v3.4.2/argocd-linux-amd64
 sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
 rm argocd-linux-amd64
 sleep 20
@@ -152,13 +178,20 @@ kubectl patch svc argocd-server -n argocd --type='json' -p='[{"op": "replace", "
 kubectl create ns jenkins
 kubectl create ns sonar
 kubectl create ns nexus
-# Create the folders
-sudo mkdir -p /mnt/data/jenkins
-sudo mkdir -p /mnt/data/postgres_data
-sudo mkdir -p /mnt/data/sonarqube_data
-sudo mkdir -p /mnt/data/sonarqube_logs
-sudo mkdir -p /mnt/data/sonarqube_extensions
-sudo mkdir -p /mnt/data/nexus_data
+# Create the host path folders expected by PersistentVolumes in the manifests
+sudo mkdir -p /home/ubuntu/data/jenkins
+sudo mkdir -p /home/ubuntu/data/postgres_data
+sudo mkdir -p /home/ubuntu/data/sonarqube_data
+sudo mkdir -p /home/ubuntu/data/sonarqube_logs
+sudo mkdir -p /home/ubuntu/data/sonarqube_extensions
+sudo mkdir -p /home/ubuntu/data/nexus-data
+# Jenkins and SonarQube run as UID 1000; Nexus 3 runs as UID 200
+sudo chown -R 1000:1000 /home/ubuntu/data/jenkins
+sudo chown -R 1000:1000 /home/ubuntu/data/postgres_data
+sudo chown -R 1000:1000 /home/ubuntu/data/sonarqube_data
+sudo chown -R 1000:1000 /home/ubuntu/data/sonarqube_logs
+sudo chown -R 1000:1000 /home/ubuntu/data/sonarqube_extensions
+sudo chown -R 200:200 /home/ubuntu/data/nexus-data
 
 
 # Get the password from the secret file
@@ -170,8 +203,8 @@ kubectl apply -f storage.yaml
 sleep 10
 kubectl apply -f jenkins
 sleep 10
-# kubectl apply -f sonarqube
-# sleep 10
-# kubectl apply -f nexus
-# sleep 20
+kubectl apply -f sonarqube
+sleep 10
+kubectl apply -f nexus
+sleep 20
 echo "Installation Completed"

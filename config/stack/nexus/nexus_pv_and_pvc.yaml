@@ -13,15 +13,12 @@ metadata:
     type: local
 spec:
   storageClassName: local-storage
-  claimRef:
-    name: nexus-data-pvc
-    namespace: nexus
   capacity:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
   local:
-    path: /mnt/data/nexus_data
+    path: /home/ubuntu/data/nexus-data
   nodeAffinity:
     required:
       nodeSelectorTerms:
